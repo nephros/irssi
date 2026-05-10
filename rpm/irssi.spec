@@ -37,6 +37,14 @@ Requires:   %{name} = %{version}-%{release}
 %description devel
 Irssi development headers
 
+%if 0%{?sailfishos_version} >= 50100
+%package perl
+Summary:    Perl package for irssi.
+
+%description perl
+Irssi perl library
+%endif
+
 %prep
 
 %setup -q -n %{name}-%{version}/irssi
@@ -65,4 +73,12 @@ sed -i 's/git log/#git log/g' autogen.sh
 %exclude /usr/lib64/pkgconfig/irssi-1.pc
 /usr/share/man/man1/irssi.1.gz
 
+%if 0%{?sailfishos_version} >= 50100
+%files perl
+%perl_archlib/*/Irssi.pm
+%perl_archlib/*/Irssi/*.pm
+%perl_archlib/*/auto/Irssi/*
+%perl_archlib/*/auto/Irssi/.packlist
+%perl_archlib/*/perllocal.pod
+%endif
 %changelog

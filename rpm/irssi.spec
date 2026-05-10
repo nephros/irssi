@@ -1,5 +1,5 @@
 Name:           irssi
-Version:        1.2.3
+Version:        1.4.5
 Release:        1
 Summary:        Modular, Secure, and Well Designed IRC Client
 License:        GPLv2
@@ -8,15 +8,12 @@ URL:            http://www.irssi.org
 Distribution:	SailfishOS
 Packager:	szopin
 Source:         irssi-%{version}.tar.xz
-# deps for autogen.sh
-BuildRequires: make
-BuildRequires:	autoconf
-BuildRequires:	automake
-BuildRequires:  openssl-devel
 BuildRequires:	gcc
-BuildRequires:	glib2-devel
-BuildRequires:	ncurses-devel
+BuildRequires:	meson
 BuildRequires:	pkgconfig
+BuildRequires:	pkgconfig(openssl)
+BuildRequires:	pkgconfig(glib-2.0)
+BuildRequires:	pkgconfig(ncursesw)
 
 
 %description
@@ -29,6 +26,18 @@ Jabber, could be added some day, too.
 
 It is the code that separates Irssi from ircII, BitchX, epic, and the
 rest of the text clients. It is not using the ircII code.
+
+%if 0%{?_chum}
+Type: console-application
+PackagedBy: szopin
+Custom:
+  Repo: https://codeberg.org/irssi/irssi
+  PackagingRepo: https://github.com/szopin/irssi
+PackageIcon: https://codeberg.org/repo-avatars/50076-0df574274780a2044751384f596a2cb9
+Links:
+  Homepage: %{url}
+%endif
+
 
 %package devel
 Summary:    Development headers and libraries for irssi.
@@ -50,16 +59,14 @@ Irssi perl library
 %setup -q -n %{name}-%{version}/irssi
 
 %build
-sed -i 's/git log/#git log/g' autogen.sh
-./autogen.sh
-%configure %{nil}
-%make_build
+%meson
+%meson_build
 
 %install
-%make_install
+%meson_install
 
 %files
-%config(noreplace) %{_sysconfdir}/irssi.conf
+#%%config(noreplace) %%{_sysconfdir}/irssi.conf
 %{_bindir}/irssi
 %doc /usr/share/doc/irssi/*
 # scripts & themes
@@ -69,16 +76,17 @@ sed -i 's/git log/#git log/g' autogen.sh
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/irssi/*
-%exclude /usr/lib/pkgconfig/irssi-1.pc
-%exclude /usr/lib64/pkgconfig/irssi-1.pc
-/usr/share/man/man1/irssi.1.gz
+%exclude %{_libdir}/pkgconfig/irssi-1.pc
+%{_mandir}/man1/irssi.1.gz
 
 %if 0%{?sailfishos_version} >= 50100
 %files perl
+%dir %{_libdir}/irssi
+%{_libdir}/irssi/modules/*.so
 %perl_archlib/*/Irssi.pm
 %perl_archlib/*/Irssi/*.pm
 %perl_archlib/*/auto/Irssi/*
-%perl_archlib/*/auto/Irssi/.packlist
-%perl_archlib/*/perllocal.pod
+#%%perl_archlib/*/auto/Irssi/.packlist
+#%%perl_archlib/*/perllocal.pod
 %endif
 %changelog
